@@ -1,0 +1,22 @@
+{
+  "name": "text-adventure-game-assignment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ACACACanne/text-adventure-game-assignment.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ACACACanne/text-adventure-game-assignment/issues"
+  },
+  "homepage": "https://github.com/ACACACanne/text-adventure-game-assignment#readme",
+  "dependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
