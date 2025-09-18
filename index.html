@@ -7,19 +7,27 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-cover bg-center font-mono text-white" 
- style="background-image: url('https://cdn.pixabay.com/photo/2024/03/04/20/07/ai-generated-8613149_1280.jpg');"><audio id="bgMusic" src="assets/sounds/Spooky-haunted-halloween-bells-sound-effect.mp3" autoplay loop></audio>
- <button id="muteBtn" onclick="toggleMusic()" class="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-900, transition">🔊 Mute
-</button>
+<body class="min-h-screen bg-cover bg-center font-mono text-white"
+  style="background-image: url('https://cdn.pixabay.com/photo/2024/03/04/20/07/ai-generated-8613149_1280.jpg');">
+
+  <!-- Audio Elements -->
+  <audio id="bgMusic" src="assets/sounds/Spooky-haunted-halloween-bells-sound-effect.mp3" autoplay loop></audio>
+  <audio id="sfx" preload="auto"></audio>
+
+  <!-- Mute Button -->
+  <button id="muteBtn" onclick="toggleMusic()" class="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-900 transition">🔊 Mute</button>
+
+  <!-- Overlay -->
   <div id="spookyOverlay" class="fixed inset-0 bg-black bg-opacity-80 opacity-0 pointer-events-none transition-opacity duration-1000 z-50"></div>
 
   <!-- Intro Section -->
   <div id="intro" class="flex flex-col items-center justify-center min-h-screen gap-8 text-center">
-    <h1 class="drip-text text-6xl font-bold text-red-700 "><span class="drip-text">The</span>
+    <h1 class="drip-text text-6xl font-bold text-red-700">
+      <span class="drip-text">The</span>
       <span class="drip-text">Haunted</span>
       <span class="drip-text">Academy</span>
     </h1>
-    <button onclick="game.startGame()" class="px-6 py-3 bg-red-700 hover:bg-red-900 text-white font-bold rounded shadow-lg transition duration-300 ease-in-out animate-pulse">
+    <button onclick="startGame()" class="px-6 py-3 bg-red-700 hover:bg-red-900 text-white font-bold rounded shadow-lg transition duration-300 ease-in-out animate-pulse">
       Enter if you dare!
     </button>
   </div>
@@ -29,24 +37,48 @@
     <div class="bg-black bg-opacity-80 p-6 rounded-lg shadow-lg max-w-3xl w-full">
       <div id="room-description" class="mb-4 text-lg"></div>
       <div id="character-dialogue" class="mb-4 italic text-yellow-300"></div>
-      <div id="inventory" class="mb-4 text-sm text-green-300"><p class="drip-text text-sm text-red-500">Inventory</p>
+      <div id="inventory" class="mb-4 text-sm text-green-300">
+        <p class="drip-text text-sm text-red-500">Inventory</p>
+      </div>
 
-</div>
-
+      <!-- Command Input -->
       <div class="flex gap-2">
         <input type="text" id="command" placeholder="Type a command..." class="flex-grow p-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
         <button onclick="game.handleCommand()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-semibold">Go</button>
-      </div><hr /><br /><br /><hr />
-      <button id="playBtn" class="px-4 py-2 text-sm sm:text-base rounded bg-[#B5838D] text-[#2B2D42] hover:scale-105 transition" onclick="resetGame()">
-        <b>Refresh</b><br />
-      
-      <button onclick="exitGame()" class="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded transition">
-      Exit Game
+      </div>
+
+      <!-- Game Controls -->
+      <hr /><br /><br /><hr />
+      <button id="playBtn" onclick="resetGame()" class="px-4 py-2 text-sm sm:text-base rounded bg-[#B5838D] text-[#2B2D42] hover:scale-105 transition">
+        <b>Restart the Game</b>
       </button>
+      <button onclick="exitGame()" class="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded transition">
+        Exit Game
+      </button><br /><br />
 
+    <!--The Haunted Academy Map-->
+      <div class="mb-4 flex justify-center min-h-screen">
+        <img src="assets/pictures/Map_TheHauntedAcademy.png" alt="Map of The Haunted Academy" class="w-full max-w-md rounded shadow-lg border border-gray-700">
+      </div>
 
+      <!-- Command Instructions -->
+      <div id="command-instructions" class="mb-4 p-4 bg-gray-900 text-white rounded shadow-lg text-sm leading-relaxed">
+        <h2 class="text-lg font-bold text-red-500 mb-2 drip-text">Available Commands</h2>
+        <ul class="list-disc list-inside space-y-1">
+          <li><code>go north</code>, <code>go south</code>, <code>go east</code>, <code>go west</code></li>
+          <li><code>take key</code></li>
+          <li><code>check inventory</code></li>
+          <li><code>use cheat sheet</code></li>
+          <li><code>talk to nurse</code>, <code>talk to patient</code>, <code>talk to professor</code></li>
+          <li><code>hint</code> or <code>ask for help</code></li>
+          <li><code>panic</code></li>
+          <li><code>exit game</code></li>
+          <li><code>reset game</code></li>
+        </ul>
+      </div>
 
-      <div id="timer" class=" drip-text-slow text-sm text-gray-400 text-right">Time Remaining: <span id="time">300</span>s</div>
+      <!-- Timer -->
+      <div id="timer" class="drip-text-slow text-sm text-gray-400 text-right">Time Remaining: <span id="time">300</span>s</div>
     </div>
   </div>
 
