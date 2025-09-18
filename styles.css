@@ -29,4 +29,14 @@
   pointer-events: auto;
 }
 
-  
+  .map-image {
+  height: 50%;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  border: 2px solid #b91c1c;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+
