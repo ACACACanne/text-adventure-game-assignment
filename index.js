@@ -1,3 +1,7 @@
+
+
+
+
 class Character {
   constructor(name, role, dialogue = []) {
     this.name = name;
@@ -153,6 +157,80 @@ class Game {
   }
 
 }
+
+function resetGame() {
+  const overlay = document.getElementById("spookyOverlay");
+
+  // Fade in the overlay
+  overlay.classList.add("fade-in");
+
+  //whisper sound or heartbeat
+  const audio = new Audio("whisper.mp3");
+  audio.play();
+
+  // Wait for 1.5 seconds, then reset
+  setTimeout(() => {
+    clearInterval(game.timerInterval);
+    game = new Game();
+    game.startGame();
+
+    // Fade out the overlay
+    overlay.classList.remove("fade-in");
+      }, 1500);
+
+    overlay.textContent = "You’ve returned to the halls of failure...";
+    overlay.classList.add("text-white", "flex", "items-center", "justify-center", "text-2xl", "font-bold");
+    
+    let game = new Game();
+
+}
+
+function exitGame() {
+    alert("You cannot escape the Academy forever...");
+  clearInterval(game.timerInterval); // stop the countdown
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("intro").classList.remove("hidden");
+
+  // Optional: reset command input and timer
+  document.getElementById("command").value = "";
+  document.getElementById("command").disabled = false;
+  document.getElementById("time").textContent = "300";
+}
+
+function toggleMusic() {
+  const audio = document.getElementById("bgMusic");
+  const button = document.getElementById("muteBtn");
+
+  if (audio.muted) {
+    audio.muted = false;
+    button.textContent = "🔊 Mute";
+  } else {
+    audio.muted = true;
+    button.textContent = "🔈 Unmute";
+  }
+}
+
+function fadeOutMusic() {
+  const audio = document.getElementById("bgMusic");
+  let volume = audio.volume;
+
+  const fade = setInterval(() => {
+    if (volume > 0.05) {
+      volume -= 0.05;
+      audio.volume = volume;
+    } else {
+      clearInterval(fade);
+      audio.muted = true;
+    }
+  }, 100);
+}
+
+
+
+
+
+
+
 
 
 
