@@ -213,19 +213,19 @@ class Game {
      // Music logic
     switch (room.name) {
       case "Entrance":
-        changeMusic("assets/sounds/Horror-suspense-intro-music.mp3");
+        changeMusic("assets/sounds/assets/sounds/Short-dramatic-background-intro-music.mp3");
         break;
       case "Exam Room 1":
-        changeMusic("assets/sounds/Short-dramatic-background-intro-music.mp3");
+        changeMusic("assets/sounds/assets/sounds/Whisper-sound.mp3");
         break;
       case "Exam Room 2":
         changeMusic("assets/sounds/Scary-strings-sound-effect.mp3");
         break;
       case "Exam Room 3":
-        changeMusic("assets/sounds/Spooky-haunted-halloween-bells-sound-effect.mp3");
+        changeMusic("assets/sounds/assets/sounds/Dramatic-suspense-scary-stinger.mp3");
         break;
       case "Director's Office":
-        changeMusic("assets/sounds/Dramatic-suspense-scary-stinger.mp3");
+        changeMusic("assets/sounds/assets/sounds/Evil-cartoon-laugh-sound-effect.mp3");
         break;
 
 
