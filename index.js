@@ -146,7 +146,7 @@ class Game {
     this.player = new Player();
     this.rooms = this.createRooms();
     this.currentRoom = this.rooms["entrance"];
-    this.timeRemaining = 600;
+    this.timeRemaining = 900;
     this.timerInterval = null;
   }
 
