@@ -225,12 +225,28 @@ class Game {
         changeMusic("assets/sounds/Dramatic-suspense-scary-stinger.mp3");
         break;
       case "Director's Office":
-        changeMusic("assets/sounds/Evil-cartoon-laugh-sound-effect.mp3");
-        
+        changeMusic("assets/sounds/Scariest-owl-sound.mp3");
         break;
-
-
     }
+
+     //Win condition check
+    if (room.name === "Director's Office" && this.player.keysCollected >= 3) {
+    // Hide game screen
+      document.getElementById("game").classList.add("hidden");
+
+    // Show victory message
+    const intro = document.getElementById("intro");
+    intro.classList.remove("hidden");
+    intro.innerHTML = `
+      <h1 class="text-4xl text-green-500 font-bold">"You present all three keys. The diploma glows brighter... You have passed."</h1>
+      <p class="mt-4 text-white">You collected all the keys and survived the final exam. "Professor Neamah nods solemnly. 'You may leave the Academy.'"</p>
+    `;
+
+    //Play victory sound
+    playSFX("assets/sounds/Dramatic-suspense-scary-stinger.mp3");
+    
+   }  
+
   }
 
   handleCommand() {
