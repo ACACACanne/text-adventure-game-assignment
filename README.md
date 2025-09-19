@@ -4,6 +4,8 @@ The Haunted Academy
 
 An immersive, text-based horror adventure game built with JavaScript, HTML, and CSS. You awaken in a decaying sanatorium where time is limited, choices matter, and every command could be your last.
 
+![The Architechture](assets/pictures/visual%20architecture%20.png)
+
 Features
 - Atmospheric horror setting with dynamic dialogue
 - Interactive command system (`go north`, `take key`, `talk to nurse`, etc.)
