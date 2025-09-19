@@ -226,6 +226,7 @@ class Game {
         break;
       case "Director's Office":
         changeMusic("assets/sounds/Evil-cartoon-laugh-sound-effect.mp3");
+        
         break;
 
 
