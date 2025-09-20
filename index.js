@@ -123,21 +123,39 @@ class Game {
     const ghost = new Character("Lonely Ghost", "neutral", ["I remember numbers...", "The fire kept me warm."]);
     const child = new Character("Timid Child", "helper", ["I hid the laptop under the pillow.", "Don't let the firewall burn you."]);
     const professor = new Character("Professor Neamah", "judge", ["Have you collected everything?", "Only the prepared may graduate."]);
+    const madChef = new Character("Mad Chef", "trickster", ["You hungry? I serve chaos.","Take the cheat sheet... if you dare.",
+    "My cleaver doesn't slice meat. It slices memory."]);
+    const snakeGuardian = new Character("Sibilith", "guardian", ["Calm your pulse. I taste your fear.","Three keys. One robe. No panic.",
+    "Truth lies behind the mirror. Do you dare inspect?"]);
 
     return {
       hall: new Room("Hall", "You awaken in the central hall of the Academy.", nurse, {
-        left: "statisticsLab",
-        center: "aiFinal",
-        right: "cyberChallenge"
+        left: "loom",
+        up: "aiFinal",
+        right: "kitchen"
       }, new Items("Pen & Paper", "Basic tools for survival.", "Tucked under the welcome mat"), new Weapon("Knife", 1), "under mat"),
+
+      kitchen:new Room("Kitchen", "The air reeks of burnt ambition. Pots clang with rage.", madChef, {
+        left: "hall",
+        up: "cyberChallenge"
+        }, new Items("Poisoned Cheat Sheet", "Looks helpful... but smells suspicious.", "Inside the boiling pot"), new Weapon("Cleaver", "Heavy and stained")),
+
+      loom: new Room("Loom", "Tiles whisper secrets. A serpent coils in silence.", snakeGuardian, {
+         right: "hall",
+         up: "statisticsLab"
+        }, new Items("Key of Truth", "Unlocks the final lore.", "Behind the cracked mirror")),
+
+
 
       statisticsLab: new Room("Statistics Lab", "Charts and distributions swirl on the walls.", patientZero, {
         up: "openData",
-        right: "hall"
+        right: "aiFinal",
+        down: "loom"
       }, new Items("Calculator", "Crunches numbers fast.", "Behind the broken monitor"), new Weapon("Sword", 3), "behind monitor"),
 
       openData: new Room("Open Data Analysis", "Datasets whisper secrets from forgotten servers.", ghost, {
-        down: "statisticsLab"
+        down: "statisticsLab",
+        right: "forensics"
       }, new Items("Numbers", "Fragments of forgotten data.", "Scattered across the dusty floor"), new Weapon("Fire", 2), "dusty floor"),
 
       aiFinal: new Room("AI Algorithm Final", "Neural networks pulse with eerie predictions.", patientEcho, {
@@ -147,15 +165,17 @@ class Game {
 
       forensics: new Room("Digital Forensics Test", "Encrypted files and corrupted logs litter the floor.", whisper, {
         up: "directorsWorkflow",
-        down: "aiFinal"
+        down: "aiFinal",
+        left: "openData"
       }, new Items("Magnifying Glass", "Reveals hidden clues.", "Behind the cupboard"), new Weapon("Taser", 2), "behind cupboard"),
 
-      directorsWorkflow: new Room("Director's Workflow", "A glowing diploma awaits.", professor, {
+      directorsWorkflow: new Room("Professor Neamah", "A glowing diploma awaits.", professor, {
         down: "forensics"
       }, new Items("Graduation Clothes", "Proof of readiness.", "Folded in the drawer"), new Weapon("Axe", 4), "drawer"),
 
       cyberChallenge: new Room("Cybersecurity Challenge", "Firewalls flicker and passwords hiss.", child, {
-        left: "hall"
+        left: "aiFinal",
+        down: "kitchen"
       }, new Items("Laptop", "Access to the digital realm.", "Under the pillow"), new Weapon("Flashlight", 1), "under pillow")
     };
   }
@@ -204,6 +224,8 @@ class Game {
       case "Open Data Analysis": changeMusic("assets/sounds/Scary-strings-sound-effect.mp3"); break;
       case "AI Algorithm Final": changeMusic("assets/sounds/Dramatic-suspense-scary-stinger.mp3"); break;
       case "Digital Forensics Test": changeMusic("assets/sounds/Scariest-owl-sound.mp3"); break;
+      case "Kitchen": changeMusic("assets/sounds/Evil-cartoon-laugh-sound-effect.mp3"); break;
+      case "Loom": changeMusic("Horror-suspense-intro-music.mp3"); break;
     }
   }
 
