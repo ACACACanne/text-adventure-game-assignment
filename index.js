@@ -187,6 +187,11 @@ class Game {
     document.getElementById("itemCount").textContent = `${this.player.items.length} of 7`;
     document.getElementById("weaponCount").textContent = `${this.player.weapons.length} of 7`;
     document.getElementById("time").textContent = this.timeRemaining;
+    const keyCount = ["Key of Logic", "Key of Insight", "Key of Connectivity"]
+       .filter(key => this.player.items.some(item => item.name === key)).length;
+
+    document.getElementById("keyTracker").textContent = `Keys Collected: ${keyCount} of 3`;
+
 
     switch (room.name) {
       case "Hall": changeMusic("assets/sounds/Short-dramatic-background-intro-music.mp3"); break;
@@ -272,15 +277,32 @@ class Game {
         this.setDialogue("No one responds...");
       }
 
+    } else if (input.startsWith("use ")) {
+      const itemName = input.replace("use ", "").trim();
+      if (this.player.items.some(i => i.name.toLowerCase() === itemName)) {
+        this.setDialogue(`You used ${itemName}. Something shifts in the shadows...`);
+      } else {
+        this.setDialogue("You don't have that item.");
+      }
+
+    } else if (input.startsWith("equip ")) {
+      const weaponName = input.replace("equip ", "").trim();
+      if (this.player.weapons.some(w => w.name.toLowerCase() === weaponName)) {
+        this.setDialogue(`You equip ${weaponName}. You feel more prepared.`);
+     } else {
+        this.setDialogue("You don't have that weapon.");
+     }
+
+    } else if (input === "inspect room") {
+      this.setDialogue("You inspect the room carefully. Strange symbols line the walls...");
+    } else if (input === "status") {
+      this.setDialogue(`Panic: ${this.player.panic} | Stealth: ${this.player.stealth} | Time: ${this.timeRemaining}s`);
     } else if (input === "hint" || input === "ask for help") {
       this.setDialogue("A whisper echoes: 'The key lies where logic falters...'");
-
     } else if (input === "exit game") {
       exitGame();
-
     } else if (input === "reset game") {
       resetGame();
-
     } else {
       this.setDialogue("Nothing happens. The silence grows heavier.");
       this.player.panic++;
