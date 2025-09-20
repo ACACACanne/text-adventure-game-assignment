@@ -112,14 +112,23 @@ class Items {
   }
 }
 
+//Weapon Class
+class Weapon {
+  constructor(name, power) {
+    this.name = name;
+    this.power = power;
+  }
+}
+
 // Room Class
 class Room {
-  constructor(name, description, character = null, exits = {}, item = null) {
+  constructor(name, description, character = null, exits = {}, item = null, weapon = null) {
     this.name = name;
     this.description = description;
     this.character = character;
     this.exits = exits;
     this.item = item;
+    this.weapon = weapon;
   }
 }
 
@@ -128,11 +137,24 @@ class Player {
   constructor() {
     this.inventory = [];
     this.keysCollected = 0;
+    this.weapon = weapon;
+    this.item = item;
   }
   addItem(item) {
     this.inventory.push(item);
     if (item.name.includes("Key")) this.keysCollected++;
   }
+  addWeapon(weapon) {
+    this.weapons.push(weapon);
+  } 
+  getItemsText () {
+    return this.items.length ? this.items.map(i => i.name).join(", "): "None";
+  }
+
+  getWeaponsText () {
+    return this.weapons.length ? this.weapons.map(i => i.name).join(", "):"None";
+  }
+
   getInventoryText() {
     return this.inventory.length
       ? this.inventory.map(item => `[${item.name}]`).join(", ")
@@ -208,8 +230,13 @@ class Game {
     document.getElementById("character-dialogue").textContent = room.character
       ? room.character.speak()
       : "The room is eerily silent.";
+    document.getElementById("Items").textContent = `Items: ${this.player.getItemsText()} `;
+    document.getElementById("Weapons").textContent = `Weapons: ${this.player.getWeaponsText()}`;
+    document.getElementById("itemCount").textContent = `${this.player.items.length} of 7`;
+    document.getElementById("weaponCount").textContent = `${this.player.weapons.length} of 7`;
     document.getElementById("inventory").textContent = `Inventory: ${this.player.getInventoryText()}`;
     document.getElementById("time").textContent = this.timeRemaining;
+
      // Music logic
     switch (room.name) {
       case "Entrance":
@@ -230,7 +257,10 @@ class Game {
     }
 
      //Win condition check
-    if (room.name === "Director's Office" && this.player.keysCollected >= 3) {
+    if (room.name === "Director's Office" && 
+      this.player.keysCollected >= 3 &&
+      this.player.items.length === 7 &&
+      this.player.items.some(i => i.name === "Graduation Clothes")) {
     // Hide game screen
       document.getElementById("game").classList.add("hidden");
 
