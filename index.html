@@ -47,6 +47,11 @@
         <p id="weaponCount">Weapons Collected: 0 of 3</p>
         <p id="keyTracker">Keys Collected: 0 of 3</p>
       </div>
+      
+      <!--Current location, items, weapons, characters-->
+      <div id="locationDisplay" class=""mb-2 text-sm text-blue-300 font-semibold>
+        --Current Location: <span id="currentRoomName">-</span>
+      </div>
 
       <!-- Command Input -->
       <div class="flex gap-2">
@@ -83,8 +88,11 @@
           <li><code>check inventory</code>, <code>status</code></li>
           <li><code>hint</code>, <code>ask for help</code></li>
           <li><code>reset game</code>, <code>exit game</code></li>
+          <li><code>help</code> — shows your current room, character, item, weapon, key, and exits</li>
+
         </ul>
       </div>
+      
 
       <!-- Timer -->
       <div id="timer" class="drip-text-slow text-sm text-gray-400 text-right">Time Remaining: <span id="time">1800</span>s</div>

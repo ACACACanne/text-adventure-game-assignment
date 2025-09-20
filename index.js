@@ -182,10 +182,15 @@ class Game {
     document.getElementById("character-dialogue").textContent = room.character
       ? room.character.speak()
       : "The room is eerily silent.";
+      const role = this.currentRoom.character?.role || "empty";
+    document.getElementById("currentRoomName").textContent = `${this.currentRoom.name} (${role})`;
+
+ 
     document.getElementById("items").textContent = `Items: ${this.player.getItemsText()}`;
     document.getElementById("weapons").textContent = `Weapons: ${this.player.getWeaponsText()}`;
     document.getElementById("itemCount").textContent = `${this.player.items.length} of 7`;
     document.getElementById("weaponCount").textContent = `${this.player.weapons.length} of 7`;
+    ocument.getElementById("currentRoomName").textContent = this.currentRoom.name;
     document.getElementById("time").textContent = this.timeRemaining;
     const keyCount = ["Key of Logic", "Key of Insight", "Key of Connectivity"]
        .filter(key => this.player.items.some(item => item.name === key)).length;
@@ -284,8 +289,31 @@ class Game {
       } else {
         this.setDialogue("You don't have that item.");
       }
+    
+    } else if (input === "help") {
+      const room = this.currentRoom;
+      const exits = Object.entries(room.exits)
+        .map(([dir, target]) => `${dir} → ${this.rooms[target].name}`)
+        .join(", ");
 
-    } else if (input.startsWith("equip ")) {
+      const characterInfo = room.character
+        ? `${room.character.name} (${room.character.role})`
+        : "None";
+
+      const itemInfo = room.item
+        ? `${room.item.name}${room.item.name.includes("Key") ? " 🗝️" : ""}`
+        : "None";
+
+      const weaponInfo = room.weapon
+        ? `${room.weapon.name} 🗡️`
+        : "None";
+
+      this.setDialogue(
+    `📍 Location: ${room.name}\n🧾 ${room.description}\n🧍 Character: ${characterInfo}\n🎒 Item: ${itemInfo}\n🗡️ Weapon: ${weaponInfo}\n🚪 Exits: ${exits}`
+     );
+    } 
+
+    else if (input.startsWith("equip ")) {
       const weaponName = input.replace("equip ", "").trim();
       if (this.player.weapons.some(w => w.name.toLowerCase() === weaponName)) {
         this.setDialogue(`You equip ${weaponName}. You feel more prepared.`);
@@ -310,6 +338,14 @@ class Game {
     }
 
     document.getElementById("command").value = "";
+    document.getElementById("roomName").textContent = `Room: ${room.name}`;
+    document.getElementById("roomDescription").textContent = `Description: ${room.description}`;
+    document.getElementById("roomCharacter").textContent = `Character: ${characterInfo}`;
+    document.getElementById("roomItem").textContent = `Item: ${itemInfo}`;
+    document.getElementById("roomWeapon").textContent = `Weapon: ${weaponInfo}`;
+    document.getElementById("roomExits").textContent = `Exits: ${exits}`;
+
+
   }
 
   setDialogue(text) {
