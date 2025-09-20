@@ -129,6 +129,8 @@ class Room {
     this.exits = exits;
     this.item = item;
     this.weapon = weapon;
+    this.hiddenItemLocation = this.hiddenItemLocation;
+    this.itemRevelaed = false;
   }
 }
 
@@ -141,7 +143,7 @@ class Player {
     this.item = item;
   }
   addItem(item) {
-    this.inventory.push(item);
+    this.item.push(item);
     if (item.name.includes("Key")) this.keysCollected++;
   }
   addWeapon(weapon) {
@@ -167,43 +169,86 @@ class Game {
   constructor() {
     this.player = new Player();
     this.rooms = this.createRooms();
-    this.currentRoom = this.rooms["entrance"];
-    this.timeRemaining = 900;
+    this.currentRoom = this.rooms["hall"];
+    this.timeRemaining = 1800;
     this.timerInterval = null;
   }
 
   createRooms() {
-    const nurse = new Character("Nurse Algorithm", "nurse", [
+    const nurse = new Character("Nurse Algorithm", "helper", [
       "Remember to pace yourself.",
       "Hints are hidden in plain sight.",
       "Use your cheat sheet wisely."
     ]);
 
-    const patients = [
-      new Character("Patient Zero", "patient", [
+    const patientZero = 
+      new Character("Patient Zero", "maniac", [
+        "I will find you",
+        "You can't escape me",
         "I can't find the key!",
         "Did you hear that whisper?",
         "We're running out of time!"
-      ]),
-      new Character("Patient Echo", "patient", [
+      ]);
+    const patientEcho = 
+      new Character("Patient Echo", "helper", [
         "I think the answer is in Room 2.",
+        "The book helds secrets.",
+        "Stay calm and focused.",
         "Don't trust the shadows.",
         "The professor is watching us."
-      ])
-    ];
-
-    const professorNeamah = new Character("Professor Neamah", "professor", [
-      "Have you collected your keys?",
-      "Only the prepared may graduate.",
-      "Time is your greatest enemy."
+      ]);
+      const whisper = [
+       new Character("Suspicious Whisper", "trickster", [
+        "Not all paths lead to trush",
+        "You trust too easily",
+      ]);
+    const ghost = new Character("Lonely Ghost", "neutral", [
+      "I remember numbers...",
+      "The fire kept me warm."
+    ]);
+    const child = new Character("Timid Child", "helper", [
+      "I hid the laptop under the pillow.",
+      "Don't let the firewall burn you."
+    ]);
+    const professor = new Character("Professor Neamah", "judge", [
+      "Have you collected everything?",
+      "Only the prepared may graduate.", 
+      "The time is your greatest enemy."
     ]);
 
     return {
-      entrance: new Room("Entrance", "You awaken in the entrance hall of the Sanatorium. The air is thick with dread.", nurse, { north: "exam1" }),
-      exam1: new Room("Exam Room 1", "The walls are lined with algorithmic runes.", patients[0], { south: "entrance", east: "exam2" }, new Items("Key of Logic", "Unlocks the path to understanding.")),
-      exam2: new Room("Exam Room 2", "AI diagrams float in the air like ghosts.", patients[1], { west: "exam1", north: "exam3" }, new Items("Key of Insight", "Reveals hidden truths.")),
-      exam3: new Room("Exam Room 3", "Diagrams of mobile networks pulse on the walls.", null, { south: "exam2", north: "directorOffice" }, new Items("Key of Connectivity", "Binds knowledge together.")),
-      directorOffice: new Room("Director's Office", "A diploma glows ominously.", professorNeamah, { south: "exam3" })
+      hall: new Room("Hall", "You awaken in the central hall of the Academy. Footsteps echo in every direction.", nurse, {
+        left: "statisticsLab",
+        center: "aiFinal",
+        right: "cyberChallenge"
+      }, new Items("Pen & Paper", "Basic tools for survival.", "Tucked under the welcome mat"), new Weapon("Knife", 1)),
+
+      statisticsLab: new Room("Statistics Lab", "Charts and distributions swirl on the walls.", patientZero, {
+        up: "openData",
+        right: "hall"
+      }, new Items("Calculator", "Crunches numbers fast.", "Behind the broken monitor"), new Weapon("Sword", 3)),
+
+      openData: new Room("Open Data Analysis", "Datasets whisper secrets from forgotten servers.", ghost, {
+        down: "statisticsLab"
+      }, new Items("Numbers", "Fragments of forgotten data.", "Scattered across the dusty floor"), new Weapon("Fire", 2)),
+
+      aiFinal: new Room("AI Algorithm Final", "Neural networks pulse with eerie predictions.", patientEcho, {
+        up: "forensics",
+        down: "hall"
+      }, new Items("Book", "Contains algorithmic secrets.", "Wedged inside the server rack"), new Weapon("Shield", 2)),
+
+      forensics: new Room("Digital Forensics Test", "Encrypted files and corrupted logs litter the floor.", whisper, {
+        up: "directorWorkflow",
+        down: "aiFinal"
+      }, new Items("Magnifying Glass", "Reveals hidden clues.", "Behind the cupboard of corrupted files"), new Weapon("Taser", 2)),
+
+      directorsWorkflow: new Room("Director's Workflow", "A glowing diploma awaits. The final exam begins.", professor, {
+        down: "forensics"
+      }, new Items("Graduation Clothes", "Proof of readiness.", "Folded neatly in the locked drawer"), new Weapon("Axe", 4)),
+
+      cyberChallenge: new Room("Cybersecurity Challenge", "Firewalls flicker and passwords hiss.", child, {
+        left: "hall"
+      }, new Items("Laptop", "Access to the digital realm.", "Under the pillow in the firewall bed"), new Weapon("Flashlight", 1))
     };
   }
 
@@ -239,25 +284,31 @@ class Game {
 
      // Music logic
     switch (room.name) {
-      case "Entrance":
+      case "Hall":
         changeMusic("assets/sounds/Short-dramatic-background-intro-music.mp3");
         break;
-      case "Exam Room 1":
+      case "Statistics Lab":
         changeMusic("assets/sounds/Whisper-sound.mp3");
         break;
-      case "Exam Room 2":
+      case "Open Data":
         changeMusic("assets/sounds/Scary-strings-sound-effect.mp3");
         break;
-      case "Exam Room 3":
+      case "AI Final":
         changeMusic("assets/sounds/Dramatic-suspense-scary-stinger.mp3");
         break;
-      case "Director's Office":
+      case "Forensics":
         changeMusic("assets/sounds/Scariest-owl-sound.mp3");
+        break;
+        case "Director's Workflow":
+        changeMusic("assets/sounds/Horror-suspense-intro-music.mp3");
+        break;
+        case "Forensics":
+        changeMusic("assets/sounds/Evil-cartoon-laugh-sound-effect.mp3");
         break;
     }
 
      //Win condition check
-    if (room.name === "Director's Office" && 
+    if (room.name === "Director's Workflow" && 
       this.player.keysCollected >= 3 &&
       this.player.items.length === 7 &&
       this.player.items.some(i => i.name === "Graduation Clothes")) {
@@ -276,7 +327,7 @@ class Game {
     playSFX("assets/sounds/Dramatic-suspense-scary-stinger.mp3");
     
    }  
-
+   
   }
 
   handleCommand() {
