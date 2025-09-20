@@ -1,5 +1,3 @@
-
-
 function startGame() {
   game.startGame();
   document.getElementById("bgMusic").play();
@@ -14,8 +12,9 @@ function playSFX(src) {
 
 function changeMusic(src) {
   const bg = document.getElementById("bgMusic");
+  bg.pause();
   bg.src = src;
-  bg.muted = false;
+  bg.load();
   bg.play();
 }
 
@@ -41,7 +40,7 @@ function exitGame() {
   document.getElementById("intro").classList.remove("hidden");
   document.getElementById("command").value = "";
   document.getElementById("command").disabled = false;
-  document.getElementById("time").textContent = "300";
+  document.getElementById("time").textContent = "1800";
 }
 
 class Character {
@@ -71,7 +70,7 @@ class Weapon {
 }
 
 class Room {
-  constructor(name, description, character = null, exits = {}, item = null, weapon = null, hiddenItemLocation = "") {
+  constructor(name, description, character = null, exits = {}, item = null, weapon = null, hiddenItemLocation = "", music = "") {
     this.name = name;
     this.description = description;
     this.character = character;
@@ -80,6 +79,7 @@ class Room {
     this.weapon = weapon;
     this.hiddenItemLocation = hiddenItemLocation;
     this.itemRevealed = false;
+    this.music = music;
   }
 }
 
@@ -94,6 +94,16 @@ class Player {
   addItem(item) {
     this.items.push(item);
     if (item.name.includes("Key")) this.keysCollected++;
+  }
+  pickUp(item) {
+    if (item) {
+      this.addItem(item);
+      return `${item.name} added to your inventory.`;
+    }
+    return "There's nothing to pick up.";
+  }
+  hasItem(itemName) {
+    return this.items.some(item => item.name === itemName);
   }
   addWeapon(weapon) {
     this.weapons.push(weapon);
@@ -111,7 +121,7 @@ class Game {
     this.player = new Player();
     this.rooms = this.createRooms();
     this.currentRoom = this.rooms["hall"];
-    this.timeRemaining = 300;
+    this.timeRemaining = 1800;
     this.timerInterval = null;
   }
 
@@ -123,60 +133,45 @@ class Game {
     const ghost = new Character("Lonely Ghost", "neutral", ["I remember numbers...", "The fire kept me warm."]);
     const child = new Character("Timid Child", "helper", ["I hid the laptop under the pillow.", "Don't let the firewall burn you."]);
     const professor = new Character("Professor Neamah", "judge", ["Have you collected everything?", "Only the prepared may graduate."]);
-    const madChef = new Character("Mad Chef", "trickster", ["You hungry? I serve chaos.","Take the cheat sheet... if you dare.",
-    "My cleaver doesn't slice meat. It slices memory."]);
-    const snakeGuardian = new Character("Sibilith", "guardian", ["Calm your pulse. I taste your fear.","Three keys. One robe. No panic.",
-    "Truth lies behind the mirror. Do you dare inspect?"]);
+    const madChef = new Character("Mad Chef", "trickster", ["You hungry? I serve chaos.", "Take the cheat sheet... if you dare."]);
+    const snakeGuardian = new Character("Sibilith", "guardian", ["Calm your pulse. I taste your fear.", "Truth lies behind the mirror."]);
 
     return {
       hall: new Room("Hall", "You awaken in the central hall of the Academy.", nurse, {
-        left: "loom",
-        up: "aiFinal",
-        right: "kitchen"
-      }, new Items("Pen & Paper", "Basic tools for survival.", "Tucked under the welcome mat"), new Weapon("Knife", 1), "under mat"),
+        left: "loom", up: "aiFinal", right: "kitchen"
+      }, new Items("Pen & Paper", "Basic tools for survival.", "Tucked under the welcome mat"), new Weapon("Knife", 1), "under mat", "assets/sounds/Short-dramatic-background-intro-music.mp3"),
 
-      kitchen:new Room("Kitchen", "The air reeks of burnt ambition. Pots clang with rage.", madChef, {
-        left: "hall",
-        up: "cyberChallenge"
-        }, new Items("Poisoned Cheat Sheet", "Looks helpful... but smells suspicious.", "Inside the boiling pot"), new Weapon("Cleaver", "Heavy and stained")),
+      kitchen: new Room("Kitchen", "The air reeks of burnt ambition. Pots clang with rage.", madChef, {
+        left: "hall", up: "cyberChallenge"
+      }, new Items("Poisoned Cheat Sheet", "Looks helpful... but smells suspicious.", "Inside the boiling pot"), new Weapon("Cleaver", 3), "boiling pot", "assets/sounds/Evil-cartoon-laugh-sound-effect.mp3"),
 
       loom: new Room("Loom", "Tiles whisper secrets. A serpent coils in silence.", snakeGuardian, {
-         right: "hall",
-         up: "statisticsLab"
-        }, new Items("Key of Truth", "Unlocks the final lore.", "Behind the cracked mirror")),
-
-
+        right: "hall", up: "statisticsLab"
+      }, new Items("Key of Truth", "Unlocks the final lore.", "Behind the cracked mirror"), null, "mirror", "assets/sounds/Horror-suspense-intro-music.mp3"),
 
       statisticsLab: new Room("Statistics Lab", "Charts and distributions swirl on the walls.", patientZero, {
-        up: "openData",
-        right: "aiFinal",
-        down: "loom"
-      }, new Items("Calculator", "Crunches numbers fast.", "Behind the broken monitor"), new Weapon("Sword", 3), "behind monitor"),
+        up: "openData", right: "aiFinal", down: "loom"
+      }, new Items("Calculator", "Crunches numbers fast.", "Behind the broken monitor"), new Weapon("Sword", 3), "monitor", "assets/sounds/Whisper-sound.mp3"),
 
       openData: new Room("Open Data Analysis", "Datasets whisper secrets from forgotten servers.", ghost, {
-        down: "statisticsLab",
-        right: "forensics"
-      }, new Items("Numbers", "Fragments of forgotten data.", "Scattered across the dusty floor"), new Weapon("Fire", 2), "dusty floor"),
+        down: "statisticsLab", right: "forensics"
+      }, new Items("Key of Connectivity", "Links forgotten systems.", "Scattered across the dusty floor"), new Weapon("Fire", 2), "floor", "assets/sounds/Scary-strings-sound-effect.mp3"),
 
       aiFinal: new Room("AI Algorithm Final", "Neural networks pulse with eerie predictions.", patientEcho, {
-        up: "forensics",
-        down: "hall"
-      }, new Items("Book", "Contains algorithmic secrets.", "Inside the server rack"), new Weapon("Shield", 2), "server rack"),
+        up: "forensics", down: "hall"
+      }, new Items("Key of Insight", "Contains algorithmic secrets.", "Inside the server rack"), new Weapon("Shield", 2), "server rack", "assets/sounds/Dramatic-suspense-scary-stinger.mp3"),
 
       forensics: new Room("Digital Forensics Test", "Encrypted files and corrupted logs litter the floor.", whisper, {
-        up: "directorsWorkflow",
-        down: "aiFinal",
-        left: "openData"
-      }, new Items("Magnifying Glass", "Reveals hidden clues.", "Behind the cupboard"), new Weapon("Taser", 2), "behind cupboard"),
+        up: "directorWorkflow", down: "aiFinal", left: "openData"
+      }, new Items("Magnifying Glass", "Reveals hidden clues.", "Behind the cupboard"), new Weapon("Taser", 2), "cupboard", "assets/sounds/Scariest-owl-sound.mp3"),
 
-      directorsWorkflow: new Room("Professor Neamah", "A glowing diploma awaits.", professor, {
+      directorWorkflow: new Room("Professor Neamah", "A glowing diploma awaits.", professor, {
         down: "forensics"
-      }, new Items("Graduation Clothes", "Proof of readiness.", "Folded in the drawer"), new Weapon("Axe", 4), "drawer"),
+      }, new Items("Graduation Clothes", "Proof of readiness.", "Folded in the drawer"), new Weapon("Axe", 4), "drawer", "assets/sounds/Graduation-theme.mp3"),
 
       cyberChallenge: new Room("Cybersecurity Challenge", "Firewalls flicker and passwords hiss.", child, {
-        left: "aiFinal",
-        down: "kitchen"
-      }, new Items("Laptop", "Access to the digital realm.", "Under the pillow"), new Weapon("Flashlight", 1), "under pillow")
+        left: "aiFinal", down: "kitchen"
+      }, new Items("Laptop", "Access to the digital realm.", "Under the pillow"), new Weapon("Flashlight", 1), "pillow", "assets/sounds/Firewall-buzz.mp3")
     };
   }
 
@@ -196,55 +191,74 @@ class Game {
       this.endGame("Time ran out. You failed the final exam.", "The director laughs in the darkness.");
     }
   }
+
   updateUI() {
     const room = this.currentRoom;
     document.getElementById("room-description").textContent = room.description;
     document.getElementById("character-dialogue").textContent = room.character
       ? room.character.speak()
       : "The room is eerily silent.";
-      const role = this.currentRoom.character?.role || "empty";
-    document.getElementById("currentRoomName").textContent = `${this.currentRoom.name} (${role})`;
 
- 
+    const role = room.character?.role || "empty";
+    document.getElementById("currentRoomName").textContent = `${room.name} (${role})`;
+
     document.getElementById("items").textContent = `Items: ${this.player.getItemsText()}`;
     document.getElementById("weapons").textContent = `Weapons: ${this.player.getWeaponsText()}`;
-    document.getElementById("itemCount").textContent = `${this.player.items.length} of 7`;
-    document.getElementById("weaponCount").textContent = `${this.player.weapons.length} of 7`;
-    ocument.getElementById("currentRoomName").textContent = this.currentRoom.name;
+    document.getElementById("itemCount").textContent = `Items Collected: ${this.player.items.length} of 7`;
+    document.getElementById("weaponCount").textContent = `Weapons Collected: ${this.player.weapons.length} of 7`;
+    document.getElementById("keyTracker").textContent = `Keys Collected: ${this.player.keysCollected} of 3`;
     document.getElementById("time").textContent = this.timeRemaining;
-    const keyCount = ["Key of Logic", "Key of Insight", "Key of Connectivity"]
-       .filter(key => this.player.items.some(item => item.name === key)).length;
 
-    document.getElementById("keyTracker").textContent = `Keys Collected: ${keyCount} of 3`;
-
-
-    switch (room.name) {
-      case "Hall": changeMusic("assets/sounds/Short-dramatic-background-intro-music.mp3"); break;
-      case "Statistics Lab": changeMusic("assets/sounds/Whisper-sound.mp3"); break;
-      case "Open Data Analysis": changeMusic("assets/sounds/Scary-strings-sound-effect.mp3"); break;
-      case "AI Algorithm Final": changeMusic("assets/sounds/Dramatic-suspense-scary-stinger.mp3"); break;
-      case "Digital Forensics Test": changeMusic("assets/sounds/Scariest-owl-sound.mp3"); break;
-      case "Kitchen": changeMusic("assets/sounds/Evil-cartoon-laugh-sound-effect.mp3"); break;
-      case "Loom": changeMusic("Horror-suspense-intro-music.mp3"); break;
-    }
+    if (room.music) changeMusic(room.music);
   }
 
-  handleCommand() {
+handleCommand() {
     const input = document.getElementById("command").value.toLowerCase().trim();
     const room = this.currentRoom;
 
-    if (input.startsWith("go ")) {
+    const characterInfo = room.character
+      ? `${room.character.name} (${room.character.role})`
+      : "None";
+
+    const itemInfo = room.item
+      ? `${room.item.name}${room.item.name.includes("Key") ? " 🗝️" : ""}`
+      : "None";
+
+    const weaponInfo = room.weapon
+      ? `${room.weapon.name} 🗡️`
+      : "None";
+
+    const exits = Object.entries(room.exits)
+      .map(([dir, target]) => `${dir} → ${this.rooms[target].name}`)
+      .join(", ");
+
+    if (input === "pick up") {
+      const item = room.item;
+      const message = this.player.pickUp(item);
+      this.setDialogue(message);
+      room.item = null;
+    } else if (input.startsWith("go ")) {
       const direction = input.split(" ")[1];
-      const nextRoom = room.exits[direction];
+      const nextRoomName = room.exits[direction];
+      const nextRoom = this.rooms[nextRoomName];
+
+      if (nextRoomName === "directorWorkflow") {
+        const hasAllKeys = ["Key of Truth", "Key of Insight", "Key of Connectivity"]
+          .every(key => this.player.hasItem(key));
+        if (!hasAllKeys) {
+          this.setDialogue("The door remains sealed. You lack the knowledge to proceed.");
+          return;
+        }
+      }
+
       if (nextRoom) {
-        this.currentRoom = this.rooms[nextRoom];
+        this.currentRoom = nextRoom;
         this.updateUI();
       } else {
         this.setDialogue("You bump into a locked door.");
         this.player.panic++;
         this.timeRemaining -= 2;
       }
-
     } else if (input.startsWith("check ")) {
       const location = input.replace("check ", "").trim();
       if (room.hiddenItemLocation === location && !room.itemRevealed) {
@@ -258,17 +272,14 @@ class Game {
           this.player.panic++;
         }
       }
-
     } else if (input === "take item" && room.itemRevealed && room.item) {
       this.player.addItem(room.item);
       this.setDialogue(`You picked up: ${room.item.name}`);
       room.item = null;
-
     } else if (input === "take weapon" && room.weapon) {
       this.player.addWeapon(room.weapon);
       this.setDialogue(`You armed yourself with: ${room.weapon.name}`);
       room.weapon = null;
-
     } else if (input.startsWith("fight") && room.character?.role === "maniac") {
       if (this.player.weapons.length > 0) {
         this.setDialogue("You fought off Patient Zero with your weapon!");
@@ -276,26 +287,21 @@ class Game {
       } else {
         this.endGame("You were unarmed. Patient Zero overwhelmed you.", "Game Over.");
       }
-
     } else if (input === "hide") {
       this.player.stealth++;
       this.setDialogue("You hide in the shadows. Your stealth increases.");
-
     } else if (input === "run") {
       if (Math.random() < 0.5 + this.player.stealth * 0.1) {
         this.setDialogue("You escaped successfully!");
       } else {
         this.endGame("You tried to run, but Patient Zero was faster.", "Game Over.");
       }
-
     } else if (input === "panic") {
       this.player.panic++;
       this.timeRemaining -= 10;
       this.setDialogue("You panic. The shadows close in. Time slips away...");
-
     } else if (input === "check inventory") {
       this.setDialogue(`Items: ${this.player.getItemsText()} | Weapons: ${this.player.getWeaponsText()}`);
-
     } else if (input.startsWith("talk to ")) {
       const target = input.replace("talk to ", "").trim();
       if (room.character && room.character.name.toLowerCase().includes(target)) {
@@ -303,7 +309,6 @@ class Game {
       } else {
         this.setDialogue("No one responds...");
       }
-
     } else if (input.startsWith("use ")) {
       const itemName = input.replace("use ", "").trim();
       if (this.player.items.some(i => i.name.toLowerCase() === itemName)) {
@@ -311,38 +316,17 @@ class Game {
       } else {
         this.setDialogue("You don't have that item.");
       }
-    
-    } else if (input === "help") {
-      const room = this.currentRoom;
-      const exits = Object.entries(room.exits)
-        .map(([dir, target]) => `${dir} → ${this.rooms[target].name}`)
-        .join(", ");
-
-      const characterInfo = room.character
-        ? `${room.character.name} (${room.character.role})`
-        : "None";
-
-      const itemInfo = room.item
-        ? `${room.item.name}${room.item.name.includes("Key") ? " 🗝️" : ""}`
-        : "None";
-
-      const weaponInfo = room.weapon
-        ? `${room.weapon.name} 🗡️`
-        : "None";
-
+    } else if (input === "help" || input === "where am I") {
       this.setDialogue(
-    `📍 Location: ${room.name}\n🧾 ${room.description}\n🧍 Character: ${characterInfo}\n🎒 Item: ${itemInfo}\n🗡️ Weapon: ${weaponInfo}\n🚪 Exits: ${exits}`
-     );
-    } 
-
-    else if (input.startsWith("equip ")) {
+        `📍 Location: ${room.name}\n🧾 ${room.description}\n🧍 Character: ${characterInfo}\n🎒 Item: ${itemInfo}\n🗡️ Weapon: ${weaponInfo}\n🚪 Exits: ${exits}`
+      );
+    } else if (input.startsWith("equip ")) {
       const weaponName = input.replace("equip ", "").trim();
       if (this.player.weapons.some(w => w.name.toLowerCase() === weaponName)) {
         this.setDialogue(`You equip ${weaponName}. You feel more prepared.`);
-     } else {
+      } else {
         this.setDialogue("You don't have that weapon.");
-     }
-
+      }
     } else if (input === "inspect room") {
       this.setDialogue("You inspect the room carefully. Strange symbols line the walls...");
     } else if (input === "status") {
@@ -360,14 +344,6 @@ class Game {
     }
 
     document.getElementById("command").value = "";
-    document.getElementById("roomName").textContent = `Room: ${room.name}`;
-    document.getElementById("roomDescription").textContent = `Description: ${room.description}`;
-    document.getElementById("roomCharacter").textContent = `Character: ${characterInfo}`;
-    document.getElementById("roomItem").textContent = `Item: ${itemInfo}`;
-    document.getElementById("roomWeapon").textContent = `Weapon: ${weaponInfo}`;
-    document.getElementById("roomExits").textContent = `Exits: ${exits}`;
-
-
   }
 
   setDialogue(text) {
@@ -382,8 +358,8 @@ class Game {
   }
 }
 
-// Global Game Instance
-// 
 let game = new Game();
+
+
 
 
