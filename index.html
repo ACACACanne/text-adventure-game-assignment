@@ -15,7 +15,7 @@
   <audio id="sfx" preload="auto"></audio>
 
   <!-- Mute Button -->
-  <button id="muteBtn" onclick="toggleMusic()" class="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-900 transition">🔊 Mute</button>
+  <button id="muteBtn"  class="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-900 transition">🔊 Mute</button>
 
   <!-- Overlay -->
   <div id="spookyOverlay" class="fixed inset-0 bg-black bg-opacity-80 opacity-0 pointer-events-none transition-opacity duration-1000 z-50"></div>
@@ -27,7 +27,7 @@
       <span class="drip-text">Haunted</span>
       <span class="drip-text">Academy</span>
     </h1>
-    <button onclick="startGame()" class="px-6 py-3 bg-red-700 hover:bg-red-900 text-white font-bold rounded shadow-lg transition duration-300 ease-in-out animate-pulse">
+    <button id="startBtn" class="px-6 py-3 bg-red-700 hover:bg-red-900 text-white font-bold rounded shadow-lg transition duration-300 ease-in-out animate-pulse">
       Enter if you dare!
     </button>
   </div>
@@ -40,7 +40,7 @@
 
     <!--Inventory Message and count-->
       <div id="inventory" class="mb-4 text-sm text-green-300">
-        <p class="drip-text text-sm text-red-500">Inventory</p>
+        <p class="text-sm text-red-500">Inventory</p>
         <p id="items">Items: None</p>
         <p id="weapons">Weapons: None</p>
         <p id="itemCount">Items Collected: 0 of 7</p>
@@ -56,15 +56,15 @@
       <!-- Command Input -->
       <div class="flex gap-2">
         <input type="text" id="command" placeholder="Type a command..." class="flex-grow p-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-        <button onclick="game.handleCommand()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-semibold">Go</button>
+        <button id="commandBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-semibold">Go</button>
       </div>
 
       <!-- Game Controls -->
       <hr /><br /><br /><hr />
-      <button id="playBtn" onclick="resetGame()" class="px-4 py-2 text-sm sm:text-base rounded bg-[#B5838D] text-[#2B2D42] hover:scale-105 transition">
+      <button id="playBtn" class="px-4 py-2 text-sm sm:text-base rounded bg-[#B5838D] text-[#2B2D42] hover:scale-105 transition">
         <b>Restart the Game</b>
       </button>
-      <button onclick="exitGame()" class="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded transition">
+      <button id="exitBtn" class="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded transition">
         Exit Game
       </button><br /><br />
 
