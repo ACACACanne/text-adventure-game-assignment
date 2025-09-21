@@ -9,6 +9,9 @@ You awaken in the central hall of a cursed academy. Each room holds cryptic clue
 
 ![The Architechture](assets/pictures/visual%20architecture%20.png)
 
+![The Map](assets/pictures/Map_TheHauntedAcademy.png)
+
+
 Features
 • 	Modular Room System: Each room has its own character, item, weapon, exits, and soundtrack.
 • 	Dynamic Command Handling: Supports intuitive commands like , , , , , , and more.
