@@ -1,5 +1,33 @@
+window.startGame = startGame;
+window.toggleMusic = toggleMusic;
+window.resetGame = resetGame;
+window.exitGame = exitGame;
+
+let game;
+
+document.addEventListener("DOMContentLoaded", () => {
+  game = new Game();
+
+  document.getElementById("startBtn").addEventListener("click", startGame);
+  document.getElementById("muteBtn").addEventListener("click", toggleMusic);
+  document.getElementById("playBtn").addEventListener("click", resetGame);
+  document.getElementById("exitBtn").addEventListener("click", exitGame);
+  document.getElementById("commandBtn").addEventListener("click", () => {
+    game.handleCommand();
+  });
+
+  document.getElementById("command").addEventListener("keydown", e => {
+    if (e.key === "Enter") game.handleCommand();
+  });
+});
+
+
+
 function startGame() {
+  if (game?.timerInterval) clearInterval(game.timerInterval);
+  game = new Game();
   game.startGame();
+  document.getElementById("bgMusic").muted = false;
   document.getElementById("bgMusic").play();
 }
 
@@ -32,9 +60,20 @@ function resetGame() {
   clearInterval(game.timerInterval);
   game = new Game();
   game.startGame();
+  const overlay = document.getElementById("spookyOverlay");
+  overlay.classList.add("fade-in");
+  overlay.textContent = "You’ve returned to the halls of failure...";
+  overlay.classList.add("text-white", "flex", "items-center", "justify-center", "text-2xl", "font-bold");
+  setTimeout(() => {
+    clearInterval(game.timerInterval);
+    game = new Game();
+    game.startGame();
+    overlay.classList.remove("fade-in");
+  }, 1800);
 }
 
 function exitGame() {
+  alert("You cannot escape the Academy forever...");
   clearInterval(game.timerInterval);
   document.getElementById("game").classList.add("hidden");
   document.getElementById("intro").classList.remove("hidden");
@@ -44,10 +83,11 @@ function exitGame() {
 }
 
 class Character {
-  constructor(name, role, dialogue = []) {
+  constructor(name, role, dialogue = [], hint) {
     this.name = name;
     this.role = role;
     this.dialogue = dialogue;
+    this.hint = hint;
   }
   speak() {
     return `${this.name} says: "${this.dialogue[Math.floor(Math.random() * this.dialogue.length)]}"`;
@@ -63,14 +103,15 @@ class Items {
 }
 
 class Weapon {
-  constructor(name, power) {
+  constructor(name, power, hint) {
     this.name = name;
     this.power = power;
+    this.hint = hint;
   }
 }
 
 class Room {
-  constructor(name, description, character = null, exits = {}, item = null, weapon = null, hiddenItemLocation = "", music = "") {
+  constructor(name, description, character = null, exits = {}, item = null, weapon = null, hiddenItemLocation = "", music = "", hint = "") {
     this.name = name;
     this.description = description;
     this.character = character;
@@ -80,21 +121,30 @@ class Room {
     this.hiddenItemLocation = hiddenItemLocation;
     this.itemRevealed = false;
     this.music = music;
+    this.hint = hint;
   }
 }
 
 class Player {
   constructor() {
-    this.items = [];
+    this.inventory = [];
     this.weapons = [];
     this.keysCollected = 0;
     this.panic = 0;
     this.stealth = 0;
   }
+
   addItem(item) {
-    this.items.push(item);
+    this.inventory.push(item);
     if (item.name.includes("Key")) this.keysCollected++;
   }
+
+  getInventoryText() {
+    return this.inventory.length
+      ? this.inventory.map(item => `[${item.name}]`).join(", ")
+      : "Empty";
+  }
+
   pickUp(item) {
     if (item) {
       this.addItem(item);
@@ -102,15 +152,19 @@ class Player {
     }
     return "There's nothing to pick up.";
   }
+
   hasItem(itemName) {
-    return this.items.some(item => item.name === itemName);
+    return this.inventory.some(item => item.name === itemName);
   }
+
   addWeapon(weapon) {
     this.weapons.push(weapon);
   }
+
   getItemsText() {
-    return this.items.length ? this.items.map(i => i.name).join(", ") : "None";
+    return this.inventory.length ? this.inventory.map(i => i.name).join(", ") : "None";
   }
+
   getWeaponsText() {
     return this.weapons.length ? this.weapons.map(w => w.name).join(", ") : "None";
   }
@@ -191,7 +245,7 @@ class Game {
       this.endGame("Time ran out. You failed the final exam.", "The director laughs in the darkness.");
     }
   }
-
+  
   updateUI() {
     const room = this.currentRoom;
     document.getElementById("room-description").textContent = room.description;
@@ -200,11 +254,23 @@ class Game {
       : "The room is eerily silent.";
 
     const role = room.character?.role || "empty";
-    document.getElementById("currentRoomName").textContent = `${room.name} (${role})`;
+    const itemName = room.item ? room.item.name : "No item";
+    const weaponName = room.weapon ? room.weapon.name : "No weapon";
+    document.getElementById("currentRoomName").textContent = `${room.name} (${role}) — ${itemName}, ${weaponName}`;
+
+    if (
+      this.currentRoom.name === "Professor Neamah" &&
+      ["Key of Truth", "Key of Insight", "Key of Connectivity"].every(key => this.player.hasItem(key))
+    ) {
+      this.endGame("You present all three keys. The professor nods solemnly.", "🎓 You graduate from the haunted academy. Victory is yours!");
+      playSFX("assets/sounds/Cheering-crowd-with-applause-sound-effect.mp3");
+      return;
+    }
+
 
     document.getElementById("items").textContent = `Items: ${this.player.getItemsText()}`;
     document.getElementById("weapons").textContent = `Weapons: ${this.player.getWeaponsText()}`;
-    document.getElementById("itemCount").textContent = `Items Collected: ${this.player.items.length} of 7`;
+    document.getElementById("itemCount").textContent = `Items Collected: ${this.player.inventory.length} of 7`;
     document.getElementById("weaponCount").textContent = `Weapons Collected: ${this.player.weapons.length} of 7`;
     document.getElementById("keyTracker").textContent = `Keys Collected: ${this.player.keysCollected} of 3`;
     document.getElementById("time").textContent = this.timeRemaining;
@@ -212,7 +278,17 @@ class Game {
     if (room.music) changeMusic(room.music);
   }
 
-handleCommand() {
+  setDialogue(text) {
+    document.getElementById("character-dialogue").textContent = text;
+  }
+
+  endGame(description, dialogue) {
+    clearInterval(this.timerInterval);
+    document.getElementById("room-description").textContent = description;
+    document.getElementById("character-dialogue").textContent = dialogue;
+    document.getElementById("command").disabled = true;
+  }
+  handleCommand() {
     const input = document.getElementById("command").value.toLowerCase().trim();
     const room = this.currentRoom;
 
@@ -232,12 +308,13 @@ handleCommand() {
       .map(([dir, target]) => `${dir} → ${this.rooms[target].name}`)
       .join(", ");
 
-    if (input === "pick up") {
-      const item = room.item;
-      const message = this.player.pickUp(item);
-      this.setDialogue(message);
-      room.item = null;
-    } else if (input.startsWith("go ")) {
+    const respond = msg => {
+      this.setDialogue(msg);
+      document.getElementById("command").value = "";
+    };
+
+    // Movement
+    if (input.startsWith("go ")) {
       const direction = input.split(" ")[1];
       const nextRoomName = room.exits[direction];
       const nextRoom = this.rooms[nextRoomName];
@@ -245,120 +322,143 @@ handleCommand() {
       if (nextRoomName === "directorWorkflow") {
         const hasAllKeys = ["Key of Truth", "Key of Insight", "Key of Connectivity"]
           .every(key => this.player.hasItem(key));
-        if (!hasAllKeys) {
-          this.setDialogue("The door remains sealed. You lack the knowledge to proceed.");
-          return;
-        }
+        if (!hasAllKeys) return respond("The door remains sealed. You lack the knowledge to proceed.");
       }
 
       if (nextRoom) {
         this.currentRoom = nextRoom;
         this.updateUI();
       } else {
-        this.setDialogue("You bump into a locked door.");
+        respond("You bump into a locked door.");
         this.player.panic++;
         this.timeRemaining -= 2;
       }
+
+    // Item pickup
+    
+
+    } else if (input === "take item" && room.item) {
+       this.player.addItem(room.item);
+       this.setDialogue(`You picked up: ${room.item.name}`);
+       room.item = null;
+
+
+
+    } else if (input === "take key" && room.item) {
+      this.player.addItem(room.item);
+      respond(`You picked up: ${room.item.name}`);
+      room.item = null;
+
+    } else if (input === "take weapon" && room.weapon) {
+      this.player.addWeapon(room.weapon);
+      respond(`You armed yourself with: ${room.weapon.name}`);
+      room.weapon = null;
+
+    // Hidden item check
     } else if (input.startsWith("check ")) {
       const location = input.replace("check ", "").trim();
       if (room.hiddenItemLocation === location && !room.itemRevealed) {
         room.itemRevealed = true;
-        this.setDialogue(`You found: ${room.item.name}! Hint: ${room.item.hint}`);
+        respond(`You found: ${room.item.name}! Hint: ${room.item.hint}`);
       } else {
-        this.setDialogue("You find nothing. The shadows stir...");
+        respond("You find nothing. The shadows stir...");
         if (room.character?.role === "maniac" && Math.random() < 0.5) {
           this.endGame("You hesitated. Patient Zero lunged before you could react.", "Game Over.");
         } else {
           this.player.panic++;
         }
       }
-    } else if (input === "take item" && room.itemRevealed && room.item) {
-      this.player.addItem(room.item);
-      this.setDialogue(`You picked up: ${room.item.name}`);
-      room.item = null;
-    } else if (input === "take weapon" && room.weapon) {
-      this.player.addWeapon(room.weapon);
-      this.setDialogue(`You armed yourself with: ${room.weapon.name}`);
-      room.weapon = null;
+
+    // Combat
     } else if (input.startsWith("fight") && room.character?.role === "maniac") {
       if (this.player.weapons.length > 0) {
-        this.setDialogue("You fought off Patient Zero with your weapon!");
+        respond("You fought off Patient Zero with your weapon!");
         room.character = null;
       } else {
         this.endGame("You were unarmed. Patient Zero overwhelmed you.", "Game Over.");
       }
+
+    // Escape mechanics
     } else if (input === "hide") {
       this.player.stealth++;
-      this.setDialogue("You hide in the shadows. Your stealth increases.");
+      respond("You hide in the shadows. Your stealth increases.");
+
     } else if (input === "run") {
       if (Math.random() < 0.5 + this.player.stealth * 0.1) {
-        this.setDialogue("You escaped successfully!");
+        respond("You escaped successfully!");
       } else {
         this.endGame("You tried to run, but Patient Zero was faster.", "Game Over.");
       }
+
     } else if (input === "panic") {
       this.player.panic++;
       this.timeRemaining -= 10;
-      this.setDialogue("You panic. The shadows close in. Time slips away...");
+      respond("You panic. The shadows close in. Time slips away...");
+
+    // Inventory
     } else if (input === "check inventory") {
-      this.setDialogue(`Items: ${this.player.getItemsText()} | Weapons: ${this.player.getWeaponsText()}`);
+      respond(`Items: ${this.player.getItemsText()} | Weapons: ${this.player.getWeaponsText()}`);
+
+    } else if (input === "check full inventory") {
+      respond(`You are carrying: ${this.player.getInventoryText()}`);
+
+    // Dialogue
     } else if (input.startsWith("talk to ")) {
       const target = input.replace("talk to ", "").trim();
-      if (room.character && room.character.name.toLowerCase().includes(target)) {
-        this.setDialogue(room.character.speak());
+      const match = room.character?.name.toLowerCase().includes(target);
+      if (match) {
+        respond(room.character.speak());
       } else {
-        this.setDialogue("No one responds...");
+        respond("No one responds...");
       }
+
+    // Item usage
     } else if (input.startsWith("use ")) {
       const itemName = input.replace("use ", "").trim();
-      if (this.player.items.some(i => i.name.toLowerCase() === itemName)) {
-        this.setDialogue(`You used ${itemName}. Something shifts in the shadows...`);
+      if (this.player.inventory.some(i => i.name.toLowerCase() === itemName)) {
+        respond(`You used ${itemName}. Something shifts in the shadows...`);
       } else {
-        this.setDialogue("You don't have that item.");
+        respond("You don't have that item.");
       }
-    } else if (input === "help" || input === "where am I") {
-      this.setDialogue(
-        `📍 Location: ${room.name}\n🧾 ${room.description}\n🧍 Character: ${characterInfo}\n🎒 Item: ${itemInfo}\n🗡️ Weapon: ${weaponInfo}\n🚪 Exits: ${exits}`
-      );
+
+    // Status and help
+    } else if (input === "help" || input === "where am i") {
+      respond(`📍 Location: ${room.name}\n🧾 ${room.description}\n🧍 Character: ${characterInfo}\n🎒 Item: ${itemInfo}\n🗡️ Weapon: ${weaponInfo}\n🚪 Exits: ${exits}`);
+
     } else if (input.startsWith("equip ")) {
       const weaponName = input.replace("equip ", "").trim();
       if (this.player.weapons.some(w => w.name.toLowerCase() === weaponName)) {
-        this.setDialogue(`You equip ${weaponName}. You feel more prepared.`);
+        respond(`You equip ${weaponName}. You feel more prepared.`);
       } else {
-        this.setDialogue("You don't have that weapon.");
+        respond("You don't have that weapon.");
       }
+
     } else if (input === "inspect room") {
-      this.setDialogue("You inspect the room carefully. Strange symbols line the walls...");
+      respond("You inspect the room carefully. Strange symbols line the walls...");
+
     } else if (input === "status") {
-      this.setDialogue(`Panic: ${this.player.panic} | Stealth: ${this.player.stealth} | Time: ${this.timeRemaining}s`);
+      respond(`Panic: ${this.player.panic} | Stealth: ${this.player.stealth} | Time: ${this.timeRemaining}s`);
+
     } else if (input === "hint" || input === "ask for help") {
-      this.setDialogue("A whisper echoes: 'The key lies where logic falters...'");
+      respond("A whisper echoes: 'The key lies where logic falters...'");
+
+    // System commands
     } else if (input === "exit game") {
       exitGame();
+
     } else if (input === "reset game") {
       resetGame();
+
+    // Unknown command
     } else {
-      this.setDialogue("Nothing happens. The silence grows heavier.");
+      respond("Nothing happens. The silence grows heavier.");
       this.player.panic++;
       this.timeRemaining -= 2;
     }
-
-    document.getElementById("command").value = "";
-  }
-
-  setDialogue(text) {
-    document.getElementById("character-dialogue").textContent = text;
-  }
-
-  endGame(description, dialogue) {
-    clearInterval(this.timerInterval);
-    document.getElementById("room-description").textContent = description;
-    document.getElementById("character-dialogue").textContent = dialogue;
-    document.getElementById("command").disabled = true;
   }
 }
 
-let game = new Game();
+
 
 
 
